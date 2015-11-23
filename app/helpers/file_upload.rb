@@ -1,5 +1,8 @@
 # coding: utf-8
 
+require 'rubygems'
+require 'net/sftp'
+
 module CartoDB
   class FileUpload
 
@@ -23,7 +26,6 @@ module CartoDB
         file_uri: nil,
         enqueue:  true
       }
-
       # Used by cartodb chrome extension
       ajax_upload = false
       case
@@ -127,6 +129,8 @@ module CartoDB
       file = File.new(get_uploads_path.join(random_token).join(File.basename(filename)), "w:#{FILE_ENCODING}")
       file.write filedata
       file.close
+      CartoDB::Logger.info 'Inside upload_file_to_storage-save!!'
+      check_call_remote_copy(random_token,filename)
       file
     end
 
@@ -136,7 +140,54 @@ module CartoDB
       IO.copy_stream(src, file)
       file.close
       src.close
+      #Call for remote file copy
+      CartoDB::Logger.info 'Inside upload_file_to_storage-save_using_streaming!!'
+      check_call_remote_copy(random_token,filename)
       file
     end
+    
+    def check_call_remote_copy(random_token,filename)
+      if Cartodb.config[:nfs_remote_usage]["is_usage"]
+         mylocalhostname = `#{Cartodb.config[:nfs_remote_usage]["local_hostname_cmd"]}`
+         if mylocalhostname[1] == 'j'
+           copy_file_to_remote_filer(Cartodb.config[:nfs_remote_usage]["ny_pool"],Cartodb.config[:nfs_remote_usage]["ping_port"],Cartodb.config[:nfs_remote_usage]["user_name"],Cartodb.config[:nfs_remote_usage]["password"],Cartodb.config[:nfs_remote_usage]["connection_timeout"],filename,random_token)
+         elsif mylocalhostname[1] == 'y'
+           copy_file_to_remote_filer(Cartodb.config[:nfs_remote_usage]["nj_pool"],Cartodb.config[:nfs_remote_usage]["ping_port"],Cartodb.config[:nfs_remote_usage]["user_name"],Cartodb.config[:nfs_remote_usage]["password"],Cartodb.config[:nfs_remote_usage]["connection_timeout"],filename,random_token)
+         else
+           CartoDB::Logger.info 'Error:#{mylocalhostname} - 2nd character is not y or j!Skipping copying to remote filer!'
+         end
+      end
+    end
+
+    def copy_file_to_remote_filer(remote_host,remote_port,user_name,user_password,connection_timeout,filename,random_token)
+     if ping(remote_host,remote_port)
+       begin
+         Net::SFTP.start(remote_host, user_name, :password => user_password, :timeout => connection_timeout) do |sftp|
+           CartoDB::Logger.info  get_uploads_path.join(random_token).join(File.basename(filename)).to_s
+           # create a directory
+           sftp.mkdir! get_uploads_path.join(random_token)
+           sftp.upload!(get_uploads_path.join(random_token).join(File.basename(filename)).to_s, get_uploads_path.join(random_token).join(File.basename(filename)).to_s)
+           CartoDB::Logger.info 'Copy to Remote Filer was successful..'
+         end
+       rescue Timeout::Error
+         CartoDB::Logger.info 'Error:Copy to Remote Filer timed out'
+       resque
+         CartoDB::Logger.info 'Error:Copy to Remote Filer was unsuccessful..'
+       end
+     else
+         CartoDB::Logger.info 'Ping was not successful.. So skipping remote copy!!'
+     end
+    end
+
+    def ping(host_name,remote_port)
+        Net::Ping::TCP.econnrefused = true
+        ping_obj = Net::Ping::TCP.new(host_name, remote_port, 1)
+        if ping_obj.ping?
+           return true
+        else
+           return false
+        end
+    end
+
   end
 end
