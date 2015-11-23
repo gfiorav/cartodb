@@ -13,6 +13,15 @@ defaults: &defaults
   maps_api_cdn_template: # nil|string. E.g. '{protocol}://{zone}.cartocdn/{user}' (`/api/v1/...` fragment added via code)
   secret_token:       '71c2b25921b84a1cb21c71503ab8fb23'
   account_host:       'localhost.lan:3000'
+  nfs_remote_usage:
+     is_usage: false
+     local_hostname_cmd: /bin/hostname
+     user_name: cartodb
+     password: proper_password
+     connection_timeout: 5
+     ny_pool: 
+     nj_pool: 
+     ping_port: 22
   account_path:       '/account'
   disable_file:       '~/disable'
   watcher:
