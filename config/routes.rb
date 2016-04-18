@@ -521,6 +521,7 @@ CartoDB::Application.routes.draw do
     post   '(/user/:user_domain)(/u/:user_domain)/api/v1/maps/:map_id/layers'     => 'layers#create',  as: :api_v1_maps_layers_create
     put    '(/user/:user_domain)(/u/:user_domain)/api/v1/maps/:map_id/layers(/:id)' => 'layers#update',  as: :api_v1_maps_layers_update
     delete '(/user/:user_domain)(/u/:user_domain)/api/v1/maps/:map_id/layers/:id' => 'layers#destroy', as: :api_v1_maps_layers_destroy
+    get    '(/user/:user_domain)(/u/:user_domain)/api/v1/layers_list' => 'layers#layers_list', as: :api_v1_layers_list
 
     # Geocodings
     post '(/user/:user_domain)(/u/:user_domain)/api/v1/geocodings'                                => 'geocodings#create',               as: :api_v1_geocodings_create

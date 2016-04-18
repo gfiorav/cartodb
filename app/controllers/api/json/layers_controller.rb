@@ -6,7 +6,7 @@ require_relative '../../../models/visualization/collection'
 class Api::Json::LayersController < Api::ApplicationController
 
   ssl_required :create, :update, :destroy
-  before_filter :load_parent
+  before_filter :load_parent, :except => [:layers_list]
   before_filter :validate_read_write_permission, only: [:update, :destroy]
 
   def create
@@ -112,6 +112,38 @@ class Api::Json::LayersController < Api::ApplicationController
 
     end
   end
+
+  def layers_list
+    username = current_user.username
+    query = params[:q]
+    mapId = params[:map_id]
+    visId = params[:vis_id]
+    queryLike = '%' + query + '%'
+
+    
+
+    layers = Sequel::Model.db.fetch("
+        SELECT v.id, u.username, v.type, v.name, v.description, v.tags, false AS on_map
+        FROM visualizations AS v
+            INNER JOIN users AS u ON u.id=v.user_id
+        WHERE v.user_id IN (SELECT id FROM users WHERE username=? LIMIT 1) AND v.type IN ('table', 'remote') AND
+        (v.name ILIKE ? OR (SELECT (SELECT COUNT(*) FROM (SELECT UNNEST(v.tags) tag) AS tmp WHERE tmp.tag ILIKE ?) > 0))
+        ORDER BY type DESC, (position(? in v.name))",
+        username, queryLike, queryLike, query
+      ).all
+  
+    layersOnMap = Carto::Visualization.find(visId).related_tables.map(&:visualization).map(&:id)
+
+    layers.each do |layer|
+      if layersOnMap.include?(layer[:id]) then
+        layer[:on_map] = true
+      end
+    end
+
+    output = layers.to_json
+    render :json => output
+  end
+
 
   protected
 
