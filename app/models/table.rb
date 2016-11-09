@@ -43,11 +43,14 @@ class Table
   # @see services/importer/lib/importer/column.rb -> RESERVED_WORDS
   # @see config/initializers/carto_db.rb -> RESERVED_COLUMN_NAMES
   RESERVED_COLUMN_NAMES = %W{ oid tableoid xmin cmin xmax cmax ctid ogc_fid }
+
   PUBLIC_ATTRIBUTES = {
       :id                           => :id,
       :name                         => :name,
+      :alias                        => :alias,
       :privacy                      => :privacy_text,
       :schema                       => :schema,
+      :schema_alias                 => :schema_alias,
       :updated_at                   => :updated_at,
       :rows_counted                 => :rows_estimated,
       :table_size                   => :table_size,
@@ -675,6 +678,10 @@ class Table
     end
   end
 
+  def alias
+    @user_table.alias
+  end
+
   def name=(value)
     value = value.downcase if value
     return if value == @user_table[:name] || value.blank?
@@ -735,6 +742,10 @@ class Table
     options[:connection]['SELECT pg_total_relation_size(?) AS size', name].first[:size] / 2
   rescue Sequel::DatabaseError
     nil
+  end
+
+  def schema_alias
+    JSON.parse(@user_table.alias_columns)
   end
 
   def schema(options = {})
