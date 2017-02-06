@@ -71,7 +71,7 @@ module Carto
             vqb.without_raster
           end
 
-          if locked == 'true'
+          if locked == 'true' || samples
             vqb.with_locked(true)
           elsif locked == 'false'
             vqb.with_locked(false)
