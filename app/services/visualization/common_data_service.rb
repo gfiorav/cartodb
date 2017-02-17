@@ -26,6 +26,7 @@ module CartoDB
       end
 
       def self.build_url(controller)
+        #byebug
         common_data_config = Cartodb.config[:common_data]
         return nil unless common_data_config
 

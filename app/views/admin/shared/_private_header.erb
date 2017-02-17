@@ -17,7 +17,6 @@
       </ul>
     </div>
     <div class="Header-settings">
-      <% if current_user.has_feature_flag?('bbg_profile_menu') %>
       <ul class="Header-settingsList">
         <% unless cartodb_com_hosted? %>
         <li class="Header-settingsItem">
@@ -31,14 +30,13 @@
             <i class="UserNotifications-Icon CDB-IconFont CDB-IconFont-Alert"></i>
           </a>
         </li>
-        <% end %>
+       <% end %>
         <li class="Header-settingsItem Header-settingsItem--avatar">
           <button class="UserAvatar js-settings-dropdown">
             <img src="<%= current_user.avatar %>" class='UserAvatar-img UserAvatar-img--medium' />
           </button>
         </li>
       </ul>
-      <% end %>
     </div>
   </div>
 </div>

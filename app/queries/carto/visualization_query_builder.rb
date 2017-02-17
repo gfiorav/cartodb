@@ -337,11 +337,16 @@ class Carto::VisualizationQueryBuilder
       query = query.reverse_order if v == :desc
     }
 
+    strQuery = ""
     if @off_database_order.empty?
-      query
+      strQuery = query
     else
-      Carto::OffdatabaseQueryAdapter.new(query, @off_database_order)
+      strQuery = Carto::OffdatabaseQueryAdapter.new(query, @off_database_order)
     end
+    puts "************ Start: The query is ****************"
+    puts strQuery
+    puts "************ End  : The query is ****************"
+    strQuery
   end
 
   def build_paged(page = 1, per_page = 20)

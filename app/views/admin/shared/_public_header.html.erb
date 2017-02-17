@@ -2,6 +2,7 @@
   <div class="u-inner Header-inner">
     <div class="Header-navigation">
       <ul class="Header-navigationList">
+       <% if false %>
         <li class="js-logo">
           <a href="<%= cartodb_com_hosted? ? CartoDB.url(self, 'root') : "http://cartodb.com" %>">
             <span class="Logo Logo--avatar">
@@ -9,10 +10,14 @@
             </span>
           </a>
         </li>
+        <% end %>
 
         <% if cartodb_com_hosted? %>
-          <li class="Header-navigationItem u-hideOnTablet">
-            <a href="<%= CartoDB.url(self, 'root') %>" class="Header-navigationLink">Bloomberg Maps</a>
+          <li class="smaller strong tab button">
+            <a href="<%= CartoDB.url(self, 'root') %>" class="Header-navigationLink">Save a Copy to Make Changes</a>
+          </li>
+          <li class="smaller strong tab button">
+            <a href="<%= CartoDB.url(self, 'maps_samples') %>" class="Header-navigationLink">Back to Map Library</a>
           </li>
         <% else %>
           <li class="Header-navigationItem js-user-tour u-hideOnTablet">
