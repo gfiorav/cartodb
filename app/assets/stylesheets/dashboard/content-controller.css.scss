@@ -8,13 +8,39 @@
 .ContentController {
   background-color: $DarkGrey6;
   position: relative;
-  display: block;
+  display: flex;
   min-height: 600px;
   margin: 0 auto;
-  padding-top: 81px
+  top: 40px;
+
+  .RightContent {
+    flex: 1 1 auto;
+
+    .IntermediateInfo {
+      min-height: 180px;
+    }
+  }
+
+  .ContentList {
+    flex: 1 1 auto;
+    padding: 0 10px 0 10px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .SearchBar {
+    padding: 10px;
+    .search-bar-input {
+      color: black;
+      width:100%;
+      height:25px;
+      line-height:25px;
+    }
+  }
 }
 
 .ContentController.on-boarding { 
   padding-top: 0;
   min-height: initial;
 }
+
